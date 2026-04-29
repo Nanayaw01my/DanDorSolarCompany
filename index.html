@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>Dan & Dor Solar - Payment Reminder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #FDFCDC;
+            padding: 16px;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        .login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #006D77 0%, #00838F 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 32px;
+            padding: 40px 24px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .company-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background: #006D77;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            overflow: hidden;
+        }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .login-card h2 {
+            color: #006D77;
+            margin-bottom: 8px;
+            font-size: 22px;
+        }
+
+        .login-card p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 16px;
+            border: 1px solid #ddd;
+            border-radius: 40px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #006D77;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .login-btn:active {
+            transform: scale(0.98);
+        }
+
+        .login-error {
+            color: #E76F51;
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+
+        .main-app {
+            display: none;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 40px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #006D77;
+        }
+
+        .logout-btn {
+            background: #E76F51;
+            color: white;
+            border: none;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #006D77 0%, #00838F 100%);
+            color: white;
+            padding: 24px 20px;
+            border-radius: 24px;
+            margin-bottom: 16px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .small-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .small-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .balance-card {
+            background: white;
+            padding: 14px 20px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            border-left: 4px solid #006D77;
+            cursor: pointer;
+        }
+
+        .balance-label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .balance-value {
+            color: #006D77;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .warning-banner {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #856404;
+            display: none;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: #006D77;
+            margin-bottom: 16px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input, 
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #006D77;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .message-hint {
+            font-size: 11px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            text-align: center;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: #E76F51;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #006D77;
+            color: white;
+        }
+
+        .btn-reset {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: #006D77;
+            font-size: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 40px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 2000;
+            white-space: nowrap;
+            animation: fadeInOut 3s ease;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #006D77;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .debug-panel {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            margin-top: 10px;
+            display: none;
+            word-break: break-all;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loginContainer" class="login-container">
+        <div class="login-card">
+            <div class="company-logo" id="logoContainer">
+                <span>☀️</span>
+            </div>
+            <h2>Dan & Dor Solar</h2>
+            <p>Payment Reminder System</p>
+            <input type="text" id="username" class="login-input" placeholder="Username" autocomplete="off">
+            <input type="password" id="password" class="login-input" placeholder="Password">
+            <button class="login-btn" onclick="login()">Login</button>
+            <div id="loginError" class="login-error"></div>
+        </div>
+    </div>
+
+    <div id="mainApp" class="main-app">
+        <div class="user-header">
+            <span class="user-name" id="currentUser">User</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="header">
+            <div class="logo-area">
+                <div class="small-logo" id="smallLogo">
+                    <span>☀️</span>
+                </div>
+                <h1>☀️ DAN & DOR SOLAR</h1>
+            </div>
+            <p>Payment Reminder System 2026</p>
+        </div>
+
+        <div class="balance-card" onclick="checkBalance()">
+            <span class="balance-label">💰 SMS Balance</span>
+            <span class="balance-value" id="balanceValue">Tap to check</span>
+        </div>
+
+        <div id="warningBanner" class="warning-banner">
+            ⚠️ Low SMS balance! Please top up to continue sending messages.
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">
+                <span>📝</span> Customer Information
+            </div>
+            <div class="form-group">
+                <label>Customer Name *</label>
+                <input type="text" id="customerName" placeholder="Enter customer full name">
+            </div>
+            <div class="form-group">
+                <label>Phone Number *</label>
+                <input type="tel" id="customerPhone" placeholder="e.g., 024XXXXXXX or 055XXXXXXX">
+            </div>
+            <div class="form-group">
+                <label>Amount Owed (GHS) *</label>
+                <input type="number" id="customerAmount" placeholder="0.00" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>Due Date *</label>
+                <input type="date" id="customerDueDate">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">
+                <span>✏️</span> Message Template
+            </div>
+            <div class="form-group">
+                <textarea id="messageTemplate" rows="3">Dear {NAME}, your payment of GHS {AMOUNT} is due on {DATE}. Please clear your debt with Dan & Dor Solar Company Limited. Thank you.</textarea>
+                <div class="message-hint">💡 Use: {NAME} for customer name, {AMOUNT} for amount owed, {DATE} for due date</div>
+            </div>
+            <button class="btn btn-reset" onclick="resetMessage()" style="width:100%">⟳ Reset to Default Message</button>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-primary" id="sendBtn" onclick="sendReminder()">📱 SEND REMINDER</button>
+            <button class="btn btn-secondary" onclick="clearForm()">🗑️ Clear Form</button>
+        </div>
+
+        <div id="debugPanel" class="debug-panel"></div>
+
+        <div class="status-bar">
+            <span id="statusMessage">✅ Ready</span>
+            <span id="liveTime"></span>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h3>📱 Confirm Send</h3>
+            <p id="confirmDetails" style="margin-bottom: 20px; line-height: 1.6;"></p>
+            <div class="modal-buttons">
+                <button onclick="closeConfirmModal()" style="background:#ddd">Cancel</button>
+                <button id="confirmSendBtn" style="background:#E76F51; color:white">Send Now</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get the base URL for API calls
+        const getApiUrl = () => {
+            // For Vercel deployment, use relative path
+            if (window.location.hostname !== 'localhost') {
+                return '/api/send-sms';
+            }
+            // For local development
+            return '/api/send-sms';
+        };
+
+        const USERS = {
+            "admin": { password: "admin123", name: "Administrator" },
+            "dan": { password: "dan123", name: "Dan" },
+            "dor": { password: "dor123", name: "Dor" }
+        };
+
+        let currentUser = null;
+
+        function debugLog(message) {
+            const debugPanel = document.getElementById('debugPanel');
+            debugPanel.style.display = 'block';
+            debugPanel.innerHTML += `[${new Date().toLocaleTimeString()}] ${message}<br>`;
+            console.log(message);
+        }
+
+        function login() {
+            const username = document.getElementById('username').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+
+            if (!username || !password) {
+                errorDiv.innerText = 'Please enter username and password';
+                return;
+            }
+
+            const user = USERS[username];
+            if (user && user.password === password) {
+                currentUser = username;
+                localStorage.setItem('dandor_current_user', currentUser);
+                document.getElementById('currentUser').innerText = user.name;
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                checkBalance();
+                const today = new Date();
+                today.setDate(today.getDate() + 30);
+                document.getElementById('customerDueDate').value = today.toISOString().split('T')[0];
+                errorDiv.innerText = '';
+                showToast(`Welcome, ${user.name}!`);
+            } else {
+                errorDiv.innerText = 'Invalid username or password';
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('dandor_current_user');
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            clearForm();
+        }
+
+        function checkAutoLogin() {
+            const savedUser = localStorage.getItem('dandor_current_user');
+            if (savedUser && USERS[savedUser]) {
+                currentUser = savedUser;
+                document.getElementById('currentUser').innerText = USERS[currentUser].name;
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                checkBalance();
+                const today = new Date();
+                today.setDate(today.getDate() + 30);
+                document.getElementById('customerDueDate').value = today.toISOString().split('T')[0];
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerPhone').value = '';
+            document.getElementById('customerAmount').value = '';
+            const today = new Date();
+            today.setDate(today.getDate() + 30);
+            document.getElementById('customerDueDate').value = today.toISOString().split('T')[0];
+            document.getElementById('statusMessage').innerText = '✅ Form cleared';
+        }
+
+        function resetMessage() {
+            document.getElementById('messageTemplate').value = "Dear {NAME}, your payment of GHS {AMOUNT} is due on {DATE}. Please clear your debt with Dan & Dor Solar Company Limited. Thank you.";
+            document.getElementById('statusMessage').innerText = '✅ Message reset to default';
+            showToast('Message template reset');
+        }
+
+        function validateForm() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const amount = parseFloat(document.getElementById('customerAmount').value);
+            const dueDate = document.getElementById('customerDueDate').value;
+
+            if (!name) {
+                alert('Please enter customer name');
+                return false;
+            }
+            if (!phone) {
+                alert('Please enter phone number');
+                return false;
+            }
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return false;
+            }
+            if (!dueDate) {
+                alert('Please select a due date');
+                return false;
+            }
+            return { name, phone, amount, dueDate };
+        }
+
+        function formatPhoneNumber(phone) {
+            let cleaned = phone.replace(/\s/g, '').replace(/-/g, '').replace(/\(/g, '').replace(/\)/g, '');
+            if (cleaned.startsWith('0')) {
+                return '233' + cleaned.substring(1);
+            } else if (cleaned.startsWith('+233')) {
+                return cleaned.substring(1);
+            } else if (cleaned.length === 9) {
+                return '233' + cleaned;
+            }
+            return cleaned;
+        }
+
+        async function checkBalance() {
+            const statusDiv = document.getElementById('statusMessage');
+            const balanceDiv = document.getElementById('balanceValue');
+            const warningBanner = document.getElementById('warningBanner');
+            
+            statusDiv.innerHTML = '<span class="loading"></span> Checking balance...';
+            balanceDiv.innerText = 'Checking...';
+            
+            try {
+                const apiUrl = getApiUrl();
+                debugLog(`Calling API: ${apiUrl}?action=check-balance`);
+                
+                const response = await fetch(`${apiUrl}?action=check-balance`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                debugLog(`Balance Response: ${JSON.stringify(data)}`);
+                
+                let balance = null;
+                if (data.balance !== undefined && data.balance !== null) {
+                    balance = parseFloat(data.balance);
+                } else if (data.status === "success" && data.balance !== undefined) {
+                    balance = parseFloat(data.balance);
+                }
+                
+                if (balance !== null) {
+                    balanceDiv.innerText = `${balance.toFixed(2)} units`;
+                    statusDiv.innerText = `💰 Balance: ${balance.toFixed(2)} units`;
+                    
+                    if (balance < 10) {
+                        warningBanner.style.display = 'block';
+                    } else {
+                        warningBanner.style.display = 'none';
+                    }
+                } else {
+                    balanceDiv.innerText = 'Unavailable';
+                    statusDiv.innerText = `⚠️ Could not fetch balance`;
+                }
+            } catch (error) {
+                debugLog(`Balance check error: ${error.message}`);
+                balanceDiv.innerText = 'Error';
+                statusDiv.innerText = `⚠️ ${error.message}`;
+                showToast(`Error: ${error.message}`);
+            }
+        }
+
+        async function sendSMS(phoneNumber, message) {
+            const formattedPhone = formatPhoneNumber(phoneNumber);
+            const apiUrl = getApiUrl();
+            
+            debugLog(`Sending to: ${formattedPhone}`);
+            debugLog(`Message: ${message.substring(0, 100)}...`);
+            
+            try {
+                const response = await fetch(`${apiUrl}?action=send-sms&to=${formattedPhone}&sms=${encodeURIComponent(message)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                debugLog(`Send Response: ${JSON.stringify(data)}`);
+                
+                if (data.status === "success" || data.code === "ok" || data.message_id) {
+                    return { success: true, message: 'Sent successfully!', data: data };
+                } else {
+                    let errorMsg = data.message || data.error || 'Sending failed';
+                    if (data.code === "1007" || data.code === "1008") {
+                        errorMsg = "Insufficient balance. Please top up.";
+                        document.getElementById('warningBanner').style.display = 'block';
+                    }
+                    return { success: false, message: errorMsg, data: data };
+                }
+            } catch (error) {
+                debugLog(`Send error: ${error.message}`);
+                return { success: false, message: `Error: ${error.message}` };
+            }
+        }
+
+        async function sendReminder() {
+            const validation = validateForm();
+            if (!validation) return;
+
+            const { name, phone, amount, dueDate } = validation;
+            const messageTemplate = document.getElementById('messageTemplate').value;
+            
+            const dueDateObj = new Date(dueDate);
+            const formattedDate = dueDateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            
+            let finalMessage = messageTemplate
+                .replace(/\{NAME\}/g, name)
+                .replace(/\{AMOUNT\}/g, amount.toFixed(2))
+                .replace(/\{DATE\}/g, formattedDate);
+            
+            const confirmDetails = `
+                <strong>Customer:</strong> ${name}<br>
+                <strong>Phone:</strong> ${phone}<br>
+                <strong>Formatted Phone:</strong> ${formatPhoneNumber(phone)}<br>
+                <strong>Amount:</strong> GHS ${amount.toFixed(2)}<br>
+                <strong>Due Date:</strong> ${formattedDate}<br><br>
+                <strong>Message:</strong><br>
+                "${finalMessage}"
+            `;
+            
+            document.getElementById('confirmDetails').innerHTML = confirmDetails;
+            document.getElementById('confirmModal').style.display = 'flex';
+            
+            window.pendingSMS = {
+                phone: phone,
+                message: finalMessage,
+                name: name,
+                amount: amount
+            };
+        }
+
+        async function executeSend() {
+            const smsData = window.pendingSMS;
+            if (!smsData) return;
+            
+            closeConfirmModal();
+            
+            const sendBtn = document.getElementById('sendBtn');
+            const statusDiv = document.getElementById('statusMessage');
+            
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span class="loading"></span> Sending...';
+            statusDiv.innerHTML = '<span class="loading"></span> Sending reminder...';
+            
+            const result = await sendSMS(smsData.phone, smsData.message);
+            
+            if (result.success) {
+                showToast(`✅ Reminder sent to ${smsData.name}!`);
+                statusDiv.innerHTML = `✅ Sent to ${smsData.name} | GHS ${smsData.amount.toFixed(2)}`;
+                clearForm();
+                setTimeout(() => checkBalance(), 2000);
+            } else {
+                alert(`Failed to send: ${result.message}\n\nCheck the debug panel for details.`);
+                statusDiv.innerHTML = `❌ Failed: ${result.message}`;
+            }
+            
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '📱 SEND REMINDER';
+            window.pendingSMS = null;
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            window.pendingSMS = null;
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function updateLiveTime() {
+            const now = new Date();
+            document.getElementById('liveTime').innerText = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + now.toLocaleTimeString();
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('confirmModal');
+            if (event.target === modal) {
+                closeConfirmModal();
+            }
+        }
+
+        document.getElementById('confirmSendBtn').onclick = executeSend;
+        
+        updateLiveTime();
+        setInterval(updateLiveTime, 1000);
+        checkAutoLogin();
+        
+        // Test API connection on load
+        setTimeout(() => {
+            debugLog(`App loaded. API URL: ${getApiUrl()}`);
+            debugLog(`Current hostname: ${window.location.hostname}`);
+        }, 1000);
+    </script>
+</body>
+</html>
